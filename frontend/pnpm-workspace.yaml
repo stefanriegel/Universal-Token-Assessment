@@ -1,0 +1,6 @@
+# pnpm 10 moved these settings out of package.json's "pnpm" field.
+# Keep values in sync with the overrides section of pnpm-lock.yaml.
+overrides:
+  vite: ^8.0.5
+  postcss: ^8.5.10
+  yaml: ^1.10.3
