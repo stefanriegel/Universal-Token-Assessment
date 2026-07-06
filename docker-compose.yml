@@ -1,0 +1,6 @@
+services:
+  universal-token-assessment:
+    image: ghcr.io/stefanriegel/universal-token-assessment:latest
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
