@@ -1,0 +1,96 @@
+# GoReleaser OSS v2 — Dev channel release config
+# Differences from .goreleaser.yaml (stable):
+#   - ldflags inject Channel=dev instead of Channel=stable
+#   - No brews: section (dev releases must not update Homebrew tap)
+#   - release.make_latest: false (dev must not displace stable "latest")
+version: 2
+
+builds:
+  # macOS and Linux: pure Go, no CGO needed
+  - id: universal-token-assessment-unix
+    env:
+      - CGO_ENABLED=0
+    targets:
+      - darwin_arm64
+      - linux_amd64
+    ldflags:
+      - -s -w
+      - -X github.com/stefanriegel/Universal-Token-Assessment/internal/version.Version={{.Version}}
+      - -X github.com/stefanriegel/Universal-Token-Assessment/internal/version.Commit={{.ShortCommit}}
+      - -X github.com/stefanriegel/Universal-Token-Assessment/internal/version.Channel=dev
+    binary: universal-token-assessment
+
+  # Windows: CGO enabled for SSPI (Windows SSO) support via mingw-w64
+  - id: universal-token-assessment-windows
+    env:
+      - CGO_ENABLED=1
+      - CC=x86_64-w64-mingw32-gcc
+    targets:
+      - windows_amd64
+    ldflags:
+      - -s -w
+      - -X github.com/stefanriegel/Universal-Token-Assessment/internal/version.Version={{.Version}}
+      - -X github.com/stefanriegel/Universal-Token-Assessment/internal/version.Commit={{.ShortCommit}}
+      - -X github.com/stefanriegel/Universal-Token-Assessment/internal/version.Channel=dev
+    binary: universal-token-assessment
+
+archives:
+  - id: default
+    name_template: "universal-token-assessment_{{ .Os }}_{{ .Arch }}"
+    formats: [binary]
+    ids: [universal-token-assessment-unix, universal-token-assessment-windows]
+
+checksum:
+  name_template: "checksums.txt"
+
+signs:
+  - artifacts: checksum
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+
+snapshot:
+  version_template: "{{ .Summary }}"
+
+release:
+  github:
+    owner: stefanriegel
+    name: Universal-Token-Assessment
+  prerelease: auto
+  name_template: "{{.ProjectName}} {{.Tag}}"
+  make_latest: false
+  header: |
+    **Universal Token Assessment {{ .Tag }} — dev preview**
+
+    Unstable pre-release build for testing. For production use install the latest stable release: `brew install stefanriegel/tap/universal-token-assessment`.
+
+changelog:
+  sort: asc
+  use: git
+  # Drop the 40-char SHA prefix — readers don't need it inline.
+  format: "{{ .Message }}"
+  filters:
+    exclude:
+      - '^Merge '
+      - '^Revert '
+      - '^chore'
+      - '^ci[(:]'    # internal CI/release plumbing — not public-facing
+      - '^build[(:]'
+      - '^\d+\.\d+\.\d+' # version-bump commits
+  groups:
+    - title: "🚀 Features"
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: "🐛 Bug Fixes"
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: "📝 Documentation"
+      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: "🔧 Other Changes"
+      order: 999
