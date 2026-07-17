@@ -1,0 +1,9 @@
+.git
+node_modules
+frontend/node_modules
+frontend/dist
+*.exe
+.gsd
+.goreleaser.yaml
+README.md
+.github
