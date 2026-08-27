@@ -1,0 +1,22 @@
+schema_version: 1
+forge: github
+base_branch: main
+concurrency: 4
+worktree_parent: auto
+commands:
+  format: [auto]
+  lint: [auto]
+  typecheck: [auto]
+  test: [go, test, ./..., -count=1]
+  build: [make, build]
+protected_paths:
+  - gpg-public-key.asc
+  - scripts/install.sh
+  - scripts/install.ps1
+mandatory_gates:
+  - intent
+  - spec
+  - high-risk-plan
+  - irreversible-action
+  - merge
+  - deploy

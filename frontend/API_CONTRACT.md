@@ -26,7 +26,7 @@ The Go binary serves both the static SPA and the API on the **same port** (defau
 | Default listen address | `:8080` |
 | API prefix | `/api/v1` |
 | Content-Type (all responses) | `application/json` |
-| Static files source | `dist/` directory (Go `//go:embed dist/*`) |
+| Static files source | `frontend/dist/` in builds compiled with `-tags=production` |
 
 ---
 
@@ -569,10 +569,9 @@ ddi-scanner/
 │   └── microsoft.go           # MS DHCP/DNS collector (WMI/PowerShell)
 ├── token/
 │   └── calculator.go          # Token rate constants + ceil calculation
-├── dist/                      # Vite build output (embedded)
-│   ├── index.html
-│   └── assets/
-├── embed.go                   # //go:embed dist/*
+├── frontend/dist/             # Vite build output (production embed only)
+├── embed.go                   # test-only filesystem; untagged executables refuse to start
+├── embed_production.go        # //go:embed all:frontend/dist
 ├── go.mod
 └── go.sum
 ```
@@ -584,30 +583,34 @@ package main
 
 import "embed"
 
-//go:embed dist/*
+//go:embed all:frontend/dist
 var staticFiles embed.FS
 
 // In your HTTP handler:
 // fs := http.FileServer(http.FS(subFS))
-// where subFS, _ = fs.Sub(staticFiles, "dist")
+// where subFS, _ = fs.Sub(staticFiles, "frontend/dist")
 ```
 
 ### Build & Run
 
 ```bash
 # 1. Build frontend
-cd ui/
-npm ci
-npm run build
-cp -r dist/ ../dist/
+cd frontend/
+pnpm install --frozen-lockfile
+pnpm build
 
 # 2. Build Go binary
 cd ..
-go build -o ddi-scanner.exe .
+go build -tags=production -o ddi-scanner.exe .
 
 # 3. Run
 ./ddi-scanner.exe --port 8080
 ```
+
+An ordinary untagged `go build` is test-only and its executable refuses to
+start. This keeps clean-checkout Go tests network-free without allowing the
+committed test fixture to be served as the product UI. Production builds fail
+at compile time when `frontend/dist` is missing.
 
 The binary should:
 - Parse `--port` flag (default `8080`)

@@ -28,6 +28,8 @@ frontend/test-results/
 
 # GoReleaser output
 dist/
+!testdata/static/frontend/dist/
+!testdata/static/frontend/dist/**
 
 # Frontend build output — CI rebuilds before release, go:embed reads from disk
 frontend/dist/

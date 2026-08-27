@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: 1.25.6
+          cache: true
+      - name: Verify clean-checkout root tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e frontend/dist
+          go test . -count=1
+          test ! -e frontend/dist
+      - name: Verify repository-wide known fixture failures
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          go test -json ./... -count=1 > "$RUNNER_TEMP/go-test.json"
+          test_exit=$?
+          set -e
+          go run ./cmd/verify-known-fixtures "$RUNNER_TEMP/go-test.json" "$test_exit"
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 10.30.1
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Build frontend from lockfile
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: Verify production embedding
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s frontend/dist/index.html
+          find frontend/dist/assets -type f -size +0c -print -quit | grep -q .
+          go test -tags=production . -run '^TestProductionEmbedUsesRealFrontendBundle$' -count=1
+          go build -tags=production -o "$RUNNER_TEMP/uta-production" .
+          scripts/verify-production-embed.sh "$RUNNER_TEMP/uta-production"
