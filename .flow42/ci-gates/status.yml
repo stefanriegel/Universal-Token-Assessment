@@ -1,0 +1,16 @@
+schema_version: 1
+work_id: "ci-gates"
+title: "Add pull-request CI for build and test gates"
+work_type: "maintenance"
+stage: "verifying"
+risk: "medium"
+state_revision: 7
+created_at: "2026-08-27T21:42:04Z"
+updated_at: "2026-08-27T23:55:00+02:00"
+review_loops: 0
+blockers: []
+resume_stage: ""
+forge_item: "https://github.com/stefanriegel/Universal-Token-Assessment/issues/12"
+change_request: ""
+ci_state: "missing"
+next_actions: [independent-review, authorize-commit-and-forge-lifecycle-separately]
