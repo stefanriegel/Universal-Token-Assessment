@@ -12,7 +12,7 @@ build-frontend:
 	cd frontend && pnpm install && pnpm build
 
 build-go:
-	go build -ldflags="$(LDFLAGS)" -o Universal-Token-Assessment .
+	go build -tags=production -ldflags="$(LDFLAGS)" -o Universal-Token-Assessment .
 
 # build-windows: dev-only Windows cross-compile from macOS/Linux. CGO=0 keeps
 # the build hermetic (no mingw toolchain required) — SSPI (Windows SSO) is
@@ -20,10 +20,10 @@ build-go:
 # Production Windows builds run via GoReleaser with CGO=1 + mingw-w64 (see
 # .goreleaser*.yaml) so SSPI works at runtime.
 build-windows: build-frontend
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="$(LDFLAGS)" -o Universal-Token-Assessment.exe .
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -tags=production -ldflags="$(LDFLAGS)" -o Universal-Token-Assessment.exe .
 
 test:
-	go test ./...
+	go test ./... -count=1
 
 clean:
 	rm -f Universal-Token-Assessment Universal-Token-Assessment.exe

@@ -151,18 +151,21 @@ cd Universal-Token-Assessment
 # Build frontend (required — Go embeds frontend/dist at compile time)
 cd frontend && pnpm install && pnpm build && cd ..
 
-# Build binary
-CGO_ENABLED=0 go build -ldflags="-s -w" -o universal-token-assessment .
+# Build binary (the production tag fails closed unless frontend/dist exists)
+CGO_ENABLED=0 go build -tags=production -ldflags="-s -w" -o universal-token-assessment .
 ```
 
 **Windows build** (requires mingw-w64 for SSPI support):
 
 ```bash
 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 \
-  go build -ldflags="-s -w" -o universal-token-assessment.exe .
+  go build -tags=production -ldflags="-s -w" -o universal-token-assessment.exe .
 ```
 
 **Run tests:**
+
+Tests use a committed minimal static-files fixture and do not require frontend dependencies or `frontend/dist`.
+An untagged `go build` may be used by Go tooling, but its executable refuses to start so the test fixture cannot be served as the product UI.
 
 ```bash
 go test ./... -count=1

@@ -20,6 +20,7 @@ ARG CHANNEL=stable
 ARG TARGETOS=linux
 ARG TARGETARCH
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
+	-tags=production \
     -ldflags="-s -w \
       -X github.com/stefanriegel/Universal-Token-Assessment/internal/version.Version=${VERSION} \
       -X github.com/stefanriegel/Universal-Token-Assessment/internal/version.Commit=${COMMIT} \

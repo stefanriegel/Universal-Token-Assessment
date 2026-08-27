@@ -14,12 +14,12 @@ import (
 
 	"github.com/stefanriegel/Universal-Token-Assessment/internal/version"
 
+	adscanner "github.com/stefanriegel/Universal-Token-Assessment/internal/scanner/ad"
 	awsscanner "github.com/stefanriegel/Universal-Token-Assessment/internal/scanner/aws"
 	azurescanner "github.com/stefanriegel/Universal-Token-Assessment/internal/scanner/azure"
 	bluecatscanner "github.com/stefanriegel/Universal-Token-Assessment/internal/scanner/bluecat"
 	efficientipscanner "github.com/stefanriegel/Universal-Token-Assessment/internal/scanner/efficientip"
 	gcpscanner "github.com/stefanriegel/Universal-Token-Assessment/internal/scanner/gcp"
-	adscanner "github.com/stefanriegel/Universal-Token-Assessment/internal/scanner/ad"
 	niosscanner "github.com/stefanriegel/Universal-Token-Assessment/internal/scanner/nios"
 
 	"github.com/stefanriegel/Universal-Token-Assessment/internal/orchestrator"
@@ -29,6 +29,10 @@ import (
 )
 
 func main() {
+	if err := requireProductionBuild(); err != nil {
+		log.Fatal(err)
+	}
+
 	// 1. Bind the socket FIRST — this eliminates the browser-open race condition (INFRA-03).
 	//    LISTEN_ADDR env var controls bind address; default "127.0.0.1:8080" (loopback only)
 	//    so the local-control API is unreachable from other hosts on the LAN (issue #56).
@@ -45,7 +49,7 @@ func main() {
 	log.Printf("DDI Scanner listening on %s (url %s)", ln.Addr().String(), url)
 
 	// 2. Build the static file handler from the embedded filesystem (INFRA-01).
-	//    staticFiles is declared in embed.go (same package main) via //go:embed all:frontend/dist
+	//    Production builds embed frontend/dist; tests use a committed minimal filesystem.
 	staticHandler, err := server.NewStaticHandler(staticFiles)
 	if err != nil {
 		log.Fatalf("static handler init: %v", err)
@@ -92,4 +96,11 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 	log.Println("DDI Scanner shutting down")
+}
+
+func requireProductionBuild() error {
+	if !productionBuild {
+		return errors.New("refusing to start test-only build; rebuild with -tags=production after generating frontend/dist")
+	}
+	return nil
 }
