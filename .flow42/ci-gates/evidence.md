@@ -66,3 +66,11 @@
 - `go test -tags=production . -run '^TestProductionEmbedUsesRealFrontendBundle$' -count=1` passed; a production-tagged binary then served a non-empty real `index.html` and `assets/index-BQWxPXkj.js` on a loopback ephemeral port, while the proof rejected the test-fixture marker and cleaned up the process.
 - Generated `frontend/dist` and `frontend/node_modules` were moved out of the checkout after verification. `git diff --check` passed; no product source, fixture, dependency lock, credential, generated bundle, or binary was added.
 - Work stopped at `verifying`. No commit, push, pull-request or issue update, merge, deployment, release, publication, or other Forge write was performed.
+
+## Independent pull-request re-review
+
+- At `2026-08-27T22:21:33Z`, authenticated `gh auth status` verified `stefanriegel` as the active GitHub account with repository access.
+- Authenticated `gh pr view 11 --repo stefanriegel/Universal-Token-Assessment` read pull request 11 as open from `flow42/clean-checkout-test-entry` into `main`, with exact current head `a7b93a8bd17724c5d7374f9eff81661c27288b4f`.
+- The current status-check rollup contained one completed `CI / Build and test` check with conclusion `SUCCESS`, completed at `2026-08-27T22:19:37Z` (run `33121716366`, job `98689934235`).
+- The same authenticated response returned `reviews: []` and an empty review decision. The canonical state advanced through `pr-ready` to `ci-running`, with `ci_state: green`; the only next action is `awaiting-current-review`.
+- This reconciliation performed no product or workflow edits and no commit, push, pull-request mutation, merge, deployment, Forge write, or delegation.
