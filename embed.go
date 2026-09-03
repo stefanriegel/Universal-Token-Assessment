@@ -3,21 +3,30 @@
 package main
 
 import (
-	"embed"
 	"io/fs"
+	"testing/fstest"
+	"time"
 )
 
-//go:embed all:testdata/static/frontend/dist
-var testStaticFiles embed.FS
+// devPlaceholderMarker identifies the synthetic bundle served by untagged
+// builds. Production builds embed the real frontend and must never contain it.
+const devPlaceholderMarker = "uta-dev-placeholder-static-files"
 
-var staticFiles = mustSub(testStaticFiles, "testdata/static")
+// staticFiles is a synthetic, in-memory stand-in for the production frontend
+// bundle. Untagged builds are test-only and refuse to start (see
+// requireProductionBuild), so they carry no real assets and nothing is embedded
+// from disk.
+var staticFiles fs.FS = fstest.MapFS{
+	"frontend/dist/index.html": &fstest.MapFile{
+		Data: []byte(`<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>` + devPlaceholderMarker + `</title></head>
+<body>` + devPlaceholderMarker + `</body>
+</html>
+`),
+		Mode:    0o444,
+		ModTime: time.Time{},
+	},
+}
 
 const productionBuild = false
-
-func mustSub(files fs.FS, dir string) fs.FS {
-	sub, err := fs.Sub(files, dir)
-	if err != nil {
-		panic(err)
-	}
-	return sub
-}

@@ -28,8 +28,6 @@ frontend/test-results/
 
 # GoReleaser output
 dist/
-!testdata/static/frontend/dist/
-!testdata/static/frontend/dist/**
 
 # Frontend build output — CI rebuilds before release, go:embed reads from disk
 frontend/dist/
@@ -45,6 +43,7 @@ frontend/node_modules/
 .gsd-backup-*/
 
 # Agent-local workspaces — never committed
+.flow42/
 .superpowers/
 .claude/worktrees/
 .claude/scheduled_tasks.lock

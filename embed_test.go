@@ -13,16 +13,16 @@ import (
 	"github.com/stefanriegel/Universal-Token-Assessment/server"
 )
 
-func TestDefaultEmbedUsesRepositoryTestFilesystem(t *testing.T) {
+func TestDefaultEmbedUsesDevPlaceholderFilesystem(t *testing.T) {
 	contents, err := fs.ReadFile(staticFiles, "frontend/dist/index.html")
 	if err != nil {
-		t.Fatalf("read test index: %v", err)
+		t.Fatalf("read placeholder index: %v", err)
 	}
-	if !strings.Contains(string(contents), "flow42-test-static-files") {
-		t.Fatal("default embed does not contain the repository test fixture marker")
+	if !strings.Contains(string(contents), "uta-dev-placeholder-static-files") {
+		t.Fatal("default embed does not contain the dev placeholder marker")
 	}
 	if _, err := server.NewStaticHandler(staticFiles); err != nil {
-		t.Fatalf("create static handler from test filesystem: %v", err)
+		t.Fatalf("create static handler from placeholder filesystem: %v", err)
 	}
 }
 

@@ -24,12 +24,12 @@ for _ in {1..100}; do
   sleep 0.1
 done
 [[ -n "$url" && -s "$index_file" ]] || { cat "$log_file" >&2; exit 1; }
-! grep -q 'flow42-test-static-files' "$index_file"
+! grep -q 'uta-dev-placeholder-static-files' "$index_file"
 asset="$(grep -m1 -oE '(src|href)="(\./|/)?assets/[^"]+"' "$index_file" | cut -d'"' -f2)"
 asset="${asset#./}"
 asset="${asset#/}"
 [[ "$asset" == assets/* ]]
 curl --fail --silent --show-error "$url/$asset" -o "$asset_file"
 [[ -s "$asset_file" ]]
-! grep -q 'flow42-test-static-files' "$asset_file"
+! grep -q 'uta-dev-placeholder-static-files' "$asset_file"
 printf 'production embed served %s and %s\n' "$url/" "$asset"

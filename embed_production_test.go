@@ -16,7 +16,7 @@ func TestProductionEmbedUsesRealFrontendBundle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read production index: %v", err)
 	}
-	if strings.Contains(string(contents), "flow42-test-static-files") {
-		t.Fatal("production embed contains the repository test fixture")
+	if strings.Contains(string(contents), "uta-dev-placeholder-static-files") {
+		t.Fatal("production embed contains the dev placeholder bundle")
 	}
 }
